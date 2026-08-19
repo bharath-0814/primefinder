@@ -1,4 +1,4 @@
-// Adding Network-Coupled Cluster Stream & Speed Probe to EndlessPrimeGraph3D
+// Update EndlessPrimeGraph3D default to PAUSED until user clicks Start
 
 import * as THREE from 'three';
 import { isMillerRabin, wheel235Pass } from '../utils/bigMath.js';
@@ -11,18 +11,17 @@ export class EndlessPrimeGraph3D {
     this.camera = null;
     this.renderer = null;
 
-    // Simulation State
+    // Simulation State - PAUSED BY DEFAULT
     this.primes = [];
     this.currentCandidate = 3n;
-    this.isPlaying = true;
-    this.speed = 10000000;
+    this.isPlaying = false; // STOPPED until user clicks
+    this.speed = 10000000; // 1 Cr / sec
     this.lastFrameTime = performance.now();
 
     // Mode: 'LOCAL_CPU' | 'NETWORK_STREAM'
     this.engineMode = 'LOCAL_CPU'; 
     this.networkMbps = 50.0;
     this.networkPingMs = 15;
-    this.lastSpeedCheck = 0;
 
     // 3D Geometry
     this.maxVertices = 60000;
@@ -40,8 +39,8 @@ export class EndlessPrimeGraph3D {
     this.mouseY = 0;
 
     // Relational Analytics Storage
-    this.gapHistogram = { 2: 15, 4: 12, 6: 28, 8: 8, 10: 9, 12: 14 };
-    this.maxGap = { gap: 114, p1: 492113, p2: 492227 };
+    this.gapHistogram = { 2: 1, 4: 0, 6: 0 };
+    this.maxGap = { gap: 1, p1: 2, p2: 3 };
     this.twinCount = 0;
     this.mod6Count = { 1: 0, 5: 0 };
     this.totalPrimesRendered = 0;
@@ -79,8 +78,9 @@ export class EndlessPrimeGraph3D {
     // 6. Dynamic GPU Buffers
     this.initGPUBuffers();
 
-    // 7. Seed Initial
+    // 7. Seed Initial Prime 2 and 3
     this.addPrime(2);
+    this.addPrime(3);
 
     // 8. Bind Events
     this.bindEvents();
@@ -92,10 +92,9 @@ export class EndlessPrimeGraph3D {
   measureNetworkSpeed() {
     const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
     if (conn && conn.downlink) {
-      this.networkMbps = conn.downlink * 8; // approx Mbps
+      this.networkMbps = conn.downlink * 8;
       this.networkPingMs = conn.rtt || 20;
     } else {
-      // Fallback ping probe
       const start = performance.now();
       fetch('https://www.cloudflare.com/cdn-cgi/trace', { method: 'HEAD', mode: 'no-cors' })
         .then(() => {
@@ -120,8 +119,6 @@ export class EndlessPrimeGraph3D {
     if (mbpsEl) mbpsEl.innerText = `${this.networkMbps.toFixed(1)} Mbps`;
     if (pingEl) pingEl.innerText = `${this.networkPingMs} ms`;
     
-    // In Network Stream Mode, throughput scales with bandwidth
-    // 1 Mbps ~ 250,000 streamed prime tokens / sec
     const calculatedStreamRate = Math.round(this.networkMbps * 2500000);
     if (streamRateEl) streamRateEl.innerText = `${(calculatedStreamRate / 10000000).toFixed(1)} Cr / sec`;
 
@@ -340,7 +337,7 @@ export class EndlessPrimeGraph3D {
     const maxGapEl = document.getElementById('hud-max-gap');
     const mod6Ratio = document.getElementById('hud-mod6-ratio');
 
-    if (curP) curP.innerText = p ? p.toLocaleString() : '-';
+    if (curP) curP.innerText = p ? p.toLocaleString() : '3';
     if (curGap) curGap.innerText = gap > 0 ? `+${gap}` : 'Start';
     if (curCount) curCount.innerText = this.totalPrimesRendered.toLocaleString();
     if (twinCountEl) twinCountEl.innerText = `${this.twinCount.toLocaleString()} Twins`;
@@ -386,7 +383,7 @@ export class EndlessPrimeGraph3D {
       });
     });
 
-    // Engine Mode Toggle (Local vs Network Stream)
+    // Engine Mode Toggle
     const btnLocalMode = document.getElementById('btn-mode-local');
     const btnNetMode = document.getElementById('btn-mode-net');
     const netBadge = document.getElementById('hud-engine-badge');
@@ -420,13 +417,28 @@ export class EndlessPrimeGraph3D {
       followBtn.className = this.followHead ? 'btn-primary text-xs py-1.5 px-3' : 'btn-secondary text-xs py-1.5 px-3';
     });
 
-    // Play / Pause
+    // Play / Pause Toggle Button
     const playBtn = document.getElementById('btn-toggle-play');
-    playBtn?.addEventListener('click', () => {
+    const heroStartBtn = document.getElementById('hero-start-overlay');
+
+    const togglePlay = () => {
       this.isPlaying = !this.isPlaying;
-      playBtn.innerText = this.isPlaying ? '⏸ Pause' : '▶ Resume';
-      playBtn.className = this.isPlaying ? 'btn-primary text-xs py-1.5 px-3' : 'btn-secondary text-xs py-1.5 px-3';
-    });
+      if (this.isPlaying) {
+        if (playBtn) {
+          playBtn.innerText = '⏸ Pause Spire';
+          playBtn.className = 'btn-primary text-xs py-2 px-4 shadow-lg shadow-cyan-500/30 font-bold';
+        }
+        if (heroStartBtn) heroStartBtn.classList.add('hidden');
+      } else {
+        if (playBtn) {
+          playBtn.innerText = '▶ Start Spire';
+          playBtn.className = 'btn-primary text-xs py-2 px-4 bg-gradient-to-r from-emerald-500 to-cyan-500 shadow-lg shadow-emerald-500/30 font-bold';
+        }
+      }
+    };
+
+    playBtn?.addEventListener('click', togglePlay);
+    heroStartBtn?.addEventListener('click', togglePlay);
 
     // Mouse Interaction
     window.addEventListener('mousedown', () => { this.isUserInteracting = true; });
@@ -456,7 +468,7 @@ export class EndlessPrimeGraph3D {
 
     if (this.followHead && this.currentTipMesh) {
       const tipPos = this.currentTipMesh.position;
-      this.orbitAngle += (this.speed >= 10000000 ? 0.015 : 0.006);
+      this.orbitAngle += (this.isPlaying ? (this.speed >= 10000000 ? 0.015 : 0.006) : 0.002);
 
       const camDist = 220;
       const targetX = tipPos.x + Math.sin(this.orbitAngle) * camDist;
