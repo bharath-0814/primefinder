@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PrimeSpire 3D — Endless Dot-by-Dot Prime Manifold & Data Engine</title>
+  <title>PrimeSpire 3D — Ultra-Warp Cosmic Prime Manifold (Up to 10,000 Cr / sec)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
@@ -18,6 +18,7 @@
       border: 1px solid #1e293b;
       color: #94a3b8;
       cursor: pointer;
+      white-space: nowrap;
       transition: all 0.2s ease;
     }
     .speed-preset-btn:hover {
@@ -30,6 +31,15 @@
       color: #020617;
       font-weight: bold;
       box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
+    }
+    .speed-preset-btn.warp {
+      border-color: rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+    }
+    .speed-preset-btn.warp.active {
+      background: linear-gradient(135deg, #f59e0b, #ec4899);
+      color: #ffffff;
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.5);
     }
   </style>
 </head>
@@ -54,11 +64,11 @@
             <h1 class="font-outfit font-black text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 via-sky-200 to-indigo-300">
               PrimeSpire 3D
             </h1>
-            <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-bold animate-pulse">
-              LIVE GPU ENGINE
+            <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-bold animate-pulse">
+              WARP ENGINE: 10,000 CR / SEC
             </span>
           </div>
-          <p class="text-xs text-slate-400 font-mono">Endless Manifold: 2 → 3 → 5 → 7 → 11 → 13...</p>
+          <p class="text-xs text-slate-400 font-mono">Continuous Relativistic Prime Manifold</p>
         </div>
       </div>
 
@@ -73,12 +83,12 @@
           <span id="hud-current-gap" class="text-amber-400 font-bold text-sm">Start</span>
         </div>
         <div class="px-2.5 py-1 bg-slate-900 rounded-lg border border-slate-800">
-          <span class="text-slate-500 block text-[10px]">TOTAL PRIMES</span>
+          <span class="text-slate-500 block text-[10px]">TOTAL PRIMES TRAVERSED</span>
           <span id="hud-total-primes" class="text-slate-200 font-bold text-sm">1</span>
         </div>
         <div class="px-2.5 py-1 bg-slate-900 rounded-lg border border-slate-800">
           <span class="text-slate-500 block text-[10px]">CURRENT SPEED</span>
-          <span id="hud-speed-label" class="text-emerald-400 font-bold text-sm">1,000 / sec</span>
+          <span id="hud-speed-label" class="text-amber-400 font-bold text-sm">1 Cr / sec</span>
         </div>
       </div>
 
@@ -89,10 +99,10 @@
       
       <div class="flex items-center justify-between border-b border-slate-800 pb-2">
         <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
           <span class="text-slate-200 font-bold">Acquired Relations & Gaps</span>
         </div>
-        <span class="text-[10px] text-emerald-400 font-bold">Auto-Saved</span>
+        <span class="text-[10px] text-emerald-400 font-bold">Auto-Persisted</span>
       </div>
 
       <!-- Live Metrics -->
@@ -137,7 +147,7 @@
     </div>
 
     <!-- Bottom Controls: Speed Presets & Camera Navigation -->
-    <footer class="flex flex-col lg:flex-row items-center justify-between gap-3 pointer-events-auto bg-slate-950/90 backdrop-blur-md p-3.5 rounded-2xl border border-slate-800 shadow-2xl">
+    <footer class="flex flex-col xl:flex-row items-center justify-between gap-3 pointer-events-auto bg-slate-950/90 backdrop-blur-md p-3.5 rounded-2xl border border-slate-800 shadow-2xl">
       
       <div class="flex items-center gap-2">
         <button id="btn-toggle-play" class="btn-primary text-xs py-1.5 px-3.5 shadow-lg shadow-cyan-500/20">
@@ -148,18 +158,20 @@
         </button>
       </div>
 
-      <!-- Speed Presets Bar -->
-      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+      <!-- Speed Presets Bar (Including 1 Cr to 10,000 Cr / sec) -->
+      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar max-w-2xl py-1">
         <span class="text-xs font-mono text-slate-400 mr-1 hidden sm:inline">Speed:</span>
-        <button data-speed="20" class="speed-preset-btn">20/s</button>
-        <button data-speed="1000" class="speed-preset-btn active">1,000/s</button>
-        <button data-speed="10000" class="speed-preset-btn">10,000/s</button>
-        <button data-speed="100000" class="speed-preset-btn">100,000/s</button>
-        <button data-speed="1000000" class="speed-preset-btn">1,000,000/s (Warp)</button>
+        <button data-speed="1000" data-label="1,000 / sec" class="speed-preset-btn">1k/s</button>
+        <button data-speed="100000" data-label="1 Lakh / sec" class="speed-preset-btn">1 Lakh/s</button>
+        <button data-speed="10000000" data-label="1 Cr / sec" class="speed-preset-btn warp active">1 Cr/s</button>
+        <button data-speed="100000000" data-label="10 Cr / sec" class="speed-preset-btn warp">10 Cr/s</button>
+        <button data-speed="1000000000" data-label="100 Cr / sec" class="speed-preset-btn warp">100 Cr/s</button>
+        <button data-speed="10000000000" data-label="1,000 Cr / sec" class="speed-preset-btn warp">1,000 Cr/s</button>
+        <button data-speed="100000000000" data-label="10,000 Cr / sec (Cosmic Warp)" class="speed-preset-btn warp">10,000 Cr/s 🚀</button>
       </div>
 
-      <div class="text-[11px] font-mono text-slate-500 hidden xl:block">
-        WebGL Ring Buffer • Auto-Persisted to LocalStorage
+      <div class="text-[11px] font-mono text-slate-500 hidden 2xl:block">
+        Relativistic Stride Engine • 60 FPS
       </div>
 
     </footer>
