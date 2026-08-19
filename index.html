@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PrimeForge 3D — Cosmic Prime Engine & Discovery Lab</title>
+  <title>PrimeNexus 3D — The Web of Prime Relations & Discovery Engine</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
   <div id="app" class="flex flex-col min-h-screen relative z-10">
     
     <!-- Top Header & Global Status -->
-    <header class="border-b border-slate-800/80 bg-slate-950/75 backdrop-blur-xl sticky top-0 z-50 shadow-2xl">
+    <header class="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-50 shadow-2xl">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-white font-black text-xl border border-cyan-400/30">
@@ -26,13 +26,13 @@
           <div>
             <div class="flex items-center gap-2">
               <h1 class="font-outfit font-black text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-300">
-                PrimeForge 3D
+                PrimeNexus 3D
               </h1>
               <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 font-bold">
-                3D Cosmos Engine
+                Relations → Discovery
               </span>
             </div>
-            <p class="text-xs text-slate-400 font-mono hidden sm:block">Real-time 3D Prime Hunting & Discovery Lab</p>
+            <p class="text-xs text-slate-400 font-mono hidden sm:block">Connecting the Secret Patterns of Primes</p>
           </div>
         </div>
 
@@ -58,7 +58,7 @@
           <div class="flex items-center gap-1.5 bg-slate-900/90 border border-slate-700/60 px-3 py-1.5 rounded-lg text-xs font-mono">
             <span class="text-amber-400 font-bold">★</span>
             <span id="global-primes-found" class="text-amber-300 font-bold">0</span>
-            <span class="text-slate-400 hidden sm:inline">primes</span>
+            <span class="text-slate-400 hidden sm:inline">relations</span>
           </div>
 
           <!-- Sound Toggle -->
@@ -71,26 +71,20 @@
 
       <!-- Navigation Tabs -->
       <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1 sm:space-x-3 border-t border-slate-800/50 overflow-x-auto no-scrollbar">
-        <button data-tab="tab-find" class="nav-tab active">
-          <span class="mr-1.5">🎯</span> Find A Prime
+        <button data-tab="tab-nexus" class="nav-tab active">
+          <span class="mr-1.5">🌐</span> 3D Relation Nexus
         </button>
-        <button data-tab="tab-simple" class="nav-tab">
-          <span class="mr-1.5">🌟</span> Story Mode (ELI5)
+        <button data-tab="tab-relations" class="nav-tab">
+          <span class="mr-1.5">🔗</span> The 6 Relations
+        </button>
+        <button data-tab="tab-hunter-rel" class="nav-tab">
+          <span class="mr-1.5">🎯</span> Relational Hunter
         </button>
         <button data-tab="tab-hunter" class="nav-tab">
-          <span class="mr-1.5">⚡</span> Live Background Hunter
+          <span class="mr-1.5">⚡</span> Live Background Miner
         </button>
-        <button data-tab="tab-spirals" class="nav-tab">
-          <span class="mr-1.5">🪐</span> 3D & 2D Spirals
-        </button>
-        <button data-tab="tab-titan" class="nav-tab">
-          <span class="mr-1.5">🦖</span> The 41M Monster (2¹³⁶²⁷⁹⁸⁴¹)
-        </button>
-        <button data-tab="tab-tricks" class="nav-tab">
-          <span class="mr-1.5">🧪</span> "4 Tricks" Lab
-        </button>
-        <button data-tab="tab-conjectures" class="nav-tab">
-          <span class="mr-1.5">💰</span> $250,000 Bounty
+        <button data-tab="tab-story" class="nav-tab">
+          <span class="mr-1.5">📖</span> Human Story Guide
         </button>
       </nav>
     </header>
@@ -98,39 +92,29 @@
     <!-- Main Content Area -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
       
-      <!-- TAB 1: DEDICATED PRIME FINDING SUITE (ACTIVE DEFAULT) -->
-      <section id="tab-find" class="tab-panel active">
-        <!-- Populated by findPrime.js -->
+      <!-- TAB 1: 3D RELATION NEXUS (ACTIVE DEFAULT) -->
+      <section id="tab-nexus" class="tab-panel active">
+        <!-- Populated by relationNexus3D.js -->
       </section>
 
-      <!-- TAB 2: SIMPLE STORY MODE -->
-      <section id="tab-simple" class="tab-panel hidden">
-        <!-- Populated by simpleMode.js -->
+      <!-- TAB 2: THE 6 FUNDAMENTAL RELATIONS -->
+      <section id="tab-relations" class="tab-panel hidden">
+        <!-- Populated by relationsExplorer.js -->
       </section>
 
-      <!-- TAB 3: LIVE BACKGROUND HUNTER -->
+      <!-- TAB 3: RELATIONSHIP-DRIVEN HUNTER -->
+      <section id="tab-hunter-rel" class="tab-panel hidden">
+        <!-- Populated by relationHunter.js -->
+      </section>
+
+      <!-- TAB 4: LIVE BACKGROUND MINER -->
       <section id="tab-hunter" class="tab-panel hidden">
         <!-- Populated by hunter.js -->
       </section>
 
-      <!-- TAB 4: 2D & 3D SPIRALS -->
-      <section id="tab-spirals" class="tab-panel hidden">
-        <!-- Populated by spirals.js -->
-      </section>
-
-      <!-- TAB 5: THE 41M TITAN DEEP DIVE -->
-      <section id="tab-titan" class="tab-panel hidden">
-        <!-- Populated by titan.js -->
-      </section>
-
-      <!-- TAB 6: TRICKS & APPROACHES LAB -->
-      <section id="tab-tricks" class="tab-panel hidden">
-        <!-- Populated by tricksLab.js -->
-      </section>
-
-      <!-- TAB 7: 1-BILLION-DIGIT QUEST & CONJECTURES -->
-      <section id="tab-conjectures" class="tab-panel hidden">
-        <!-- Populated by conjectures.js -->
+      <!-- TAB 5: STORY GUIDE -->
+      <section id="tab-story" class="tab-panel hidden">
+        <!-- Populated by storyRelations.js -->
       </section>
 
     </main>
@@ -139,10 +123,10 @@
     <footer class="border-t border-slate-800/60 bg-slate-950/80 backdrop-blur text-xs text-slate-500 py-4 font-mono">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
         <div>
-          <span>PrimeForge 3D Engine</span> • Three.js WebGL & Multithreaded WebWorkers
+          <span>PrimeNexus 3D Engine</span> • Three.js WebGL & Multithreaded Relational BigInt Architecture
         </div>
         <div class="flex items-center gap-4">
-          <span>EFF $250,000 Bounty Target: 10⁹ Digits</span>
+          <span>From Relationships to Discoveries</span>
           <span class="text-cyan-400">Running Live</span>
         </div>
       </div>
