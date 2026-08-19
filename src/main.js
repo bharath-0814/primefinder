@@ -1,6 +1,8 @@
 // PrimeForge Main Application Orchestrator
 
 import { sound } from './utils/audio.js';
+import { threeUniverse } from './utils/threeUniverse.js';
+import { FindPrimeModule } from './modules/findPrime.js';
 import { SimpleModeModule } from './modules/simpleMode.js';
 import { HunterModule } from './modules/hunter.js';
 import { TitanModule } from './modules/titan.js';
@@ -10,17 +12,22 @@ import { ConjecturesModule } from './modules/conjectures.js';
 
 class App {
   constructor() {
+    this.findPrime = new FindPrimeModule();
     this.simpleMode = new SimpleModeModule();
     this.hunter = new HunterModule();
     this.titan = new TitanModule();
     this.tricks = new TricksLabModule();
     this.spirals = new SpiralsModule();
     this.conjectures = new ConjecturesModule();
-    this.currentTab = 'tab-simple';
+    this.currentTab = 'tab-find';
   }
 
   init() {
-    // Initialize all modules
+    // 1. Initialize 3D Cosmic Background
+    threeUniverse.init('webgl-3d-bg');
+
+    // 2. Initialize all functional modules
+    this.findPrime.init();
     this.simpleMode.init();
     this.hunter.init();
     this.titan.init();
@@ -28,12 +35,12 @@ class App {
     this.spirals.init();
     this.conjectures.init();
 
-    // Bind navigation and audio controls
+    // 3. Bind navigation and audio controls
     this.bindNavigation();
     this.bindAudioToggle();
 
-    console.log('%c⚡ PrimeForge Engine Initialized', 'color: #06b6d4; font-weight: bold; font-size: 14px;');
-    console.log('%cBackground Web Worker running multithreaded Lucas-Lehmer & Miller-Rabin tests.', 'color: #94a3b8;');
+    console.log('%c🪐 PrimeForge 3D Engine Initialized', 'color: #06b6d4; font-weight: bold; font-size: 16px;');
+    console.log('%cWebGL Cosmos & Background Web Worker active.', 'color: #a855f7;');
   }
 
   bindNavigation() {

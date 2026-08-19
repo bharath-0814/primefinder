@@ -11,7 +11,8 @@
   "dependencies": {
     "canvas-confetti": "^1.9.4",
     "chart.js": "^4.4.7",
-    "lucide": "^0.475.0"
+    "lucide": "^0.475.0",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "vite": "^6.1.0"

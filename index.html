@@ -3,62 +3,66 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PrimeForge — Background Prime Engine & Discovery Lab</title>
+  <title>PrimeForge 3D — Cosmic Prime Engine & Discovery Lab</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/src/styles/style.css" />
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-cyan-500 selection:text-black">
-  <div id="app" class="flex flex-col min-h-screen">
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-cyan-500 selection:text-black relative overflow-x-hidden">
+  
+  <!-- 3D Three.js WebGL Cosmic Background -->
+  <div id="webgl-3d-bg" class="fixed inset-0 pointer-events-none z-0"></div>
+
+  <div id="app" class="flex flex-col min-h-screen relative z-10">
     
     <!-- Top Header & Global Status -->
-    <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50">
+    <header class="border-b border-slate-800/80 bg-slate-950/75 backdrop-blur-xl sticky top-0 z-50 shadow-2xl">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 text-white font-black text-xl">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-white font-black text-xl border border-cyan-400/30">
             ℘
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h1 class="font-outfit font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-300">
-                PrimeForge
+              <h1 class="font-outfit font-black text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-300">
+                PrimeForge 3D
               </h1>
-              <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                v2.0 Background Engine
+              <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 font-bold">
+                3D Cosmos Engine
               </span>
             </div>
-            <p class="text-xs text-slate-400 font-mono hidden sm:block">Live Prime Hunter & Visual Story Lab</p>
+            <p class="text-xs text-slate-400 font-mono hidden sm:block">Real-time 3D Prime Hunting & Discovery Lab</p>
           </div>
         </div>
 
         <!-- Global Telemetry Badges -->
         <div class="flex items-center gap-2 sm:gap-4">
           <!-- Background Worker Status Indicator -->
-          <div class="flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 px-3 py-1.5 rounded-lg">
+          <div class="flex items-center gap-2 bg-slate-900/90 border border-slate-700/60 px-3 py-1.5 rounded-lg shadow-inner">
             <span id="worker-pulse" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
             <div class="text-xs font-mono">
               <span class="text-slate-400 hidden sm:inline">Engine:</span>
-              <span id="global-worker-status" class="text-emerald-400 font-semibold">Active (Background)</span>
+              <span id="global-worker-status" class="text-emerald-400 font-semibold">Active</span>
             </div>
           </div>
 
           <!-- Total Speed -->
-          <div class="hidden md:flex items-center gap-1.5 bg-slate-800/80 border border-slate-700/60 px-3 py-1.5 rounded-lg text-xs font-mono">
+          <div class="hidden md:flex items-center gap-1.5 bg-slate-900/90 border border-slate-700/60 px-3 py-1.5 rounded-lg text-xs font-mono">
             <span class="text-slate-400">Rate:</span>
             <span id="global-rate" class="text-cyan-400 font-bold">0</span>
             <span class="text-slate-500 text-[10px]">ops/s</span>
           </div>
 
           <!-- Discovered Count -->
-          <div class="flex items-center gap-1.5 bg-slate-800/80 border border-slate-700/60 px-3 py-1.5 rounded-lg text-xs font-mono">
+          <div class="flex items-center gap-1.5 bg-slate-900/90 border border-slate-700/60 px-3 py-1.5 rounded-lg text-xs font-mono">
             <span class="text-amber-400 font-bold">★</span>
             <span id="global-primes-found" class="text-amber-300 font-bold">0</span>
             <span class="text-slate-400 hidden sm:inline">primes</span>
           </div>
 
           <!-- Sound Toggle -->
-          <button id="btn-toggle-sound" class="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" title="Toggle Discovery Audio Chimes">
+          <button id="btn-toggle-sound" class="p-2 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-slate-700/60 text-slate-300 hover:text-white transition" title="Toggle Discovery Audio Chimes">
             <svg id="icon-sound-on" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
             <svg id="icon-sound-off" class="hidden" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
           </button>
@@ -66,24 +70,27 @@
       </div>
 
       <!-- Navigation Tabs -->
-      <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1 sm:space-x-4 border-t border-slate-800/50 overflow-x-auto no-scrollbar">
-        <button data-tab="tab-simple" class="nav-tab active">
-          <span class="mr-1.5">🌟</span> Story Mode (Plain English)
+      <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1 sm:space-x-3 border-t border-slate-800/50 overflow-x-auto no-scrollbar">
+        <button data-tab="tab-find" class="nav-tab active">
+          <span class="mr-1.5">🎯</span> Find A Prime
+        </button>
+        <button data-tab="tab-simple" class="nav-tab">
+          <span class="mr-1.5">🌟</span> Story Mode (ELI5)
         </button>
         <button data-tab="tab-hunter" class="nav-tab">
           <span class="mr-1.5">⚡</span> Live Background Hunter
         </button>
+        <button data-tab="tab-spirals" class="nav-tab">
+          <span class="mr-1.5">🪐</span> 3D & 2D Spirals
+        </button>
         <button data-tab="tab-titan" class="nav-tab">
-          <span class="mr-1.5">🦖</span> The 41M Monster (2¹³⁶²⁷⁹⁸⁴¹−1)
+          <span class="mr-1.5">🦖</span> The 41M Monster (2¹³⁶²⁷⁹⁸⁴¹)
         </button>
         <button data-tab="tab-tricks" class="nav-tab">
-          <span class="mr-1.5">🧪</span> "4 Tricks" Interactive Lab
-        </button>
-        <button data-tab="tab-spirals" class="nav-tab">
-          <span class="mr-1.5">🌀</span> 2D Prime Spirals
+          <span class="mr-1.5">🧪</span> "4 Tricks" Lab
         </button>
         <button data-tab="tab-conjectures" class="nav-tab">
-          <span class="mr-1.5">💰</span> $250,000 Prize Quest
+          <span class="mr-1.5">💰</span> $250,000 Bounty
         </button>
       </nav>
     </header>
@@ -91,32 +98,37 @@
     <!-- Main Content Area -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
       
-      <!-- TAB 0: SIMPLE STORY MODE (ACTIVE BY DEFAULT) -->
-      <section id="tab-simple" class="tab-panel active">
+      <!-- TAB 1: DEDICATED PRIME FINDING SUITE (ACTIVE DEFAULT) -->
+      <section id="tab-find" class="tab-panel active">
+        <!-- Populated by findPrime.js -->
+      </section>
+
+      <!-- TAB 2: SIMPLE STORY MODE -->
+      <section id="tab-simple" class="tab-panel hidden">
         <!-- Populated by simpleMode.js -->
       </section>
 
-      <!-- TAB 1: LIVE BACKGROUND HUNTER -->
+      <!-- TAB 3: LIVE BACKGROUND HUNTER -->
       <section id="tab-hunter" class="tab-panel hidden">
         <!-- Populated by hunter.js -->
       </section>
 
-      <!-- TAB 2: THE 41M TITAN DEEP DIVE -->
-      <section id="tab-titan" class="tab-panel hidden">
-        <!-- Populated by titan.js -->
-      </section>
-
-      <!-- TAB 3: TRICKS & APPROACHES LAB -->
-      <section id="tab-tricks" class="tab-panel hidden">
-        <!-- Populated by tricksLab.js -->
-      </section>
-
-      <!-- TAB 4: 2D SPIRALS -->
+      <!-- TAB 4: 2D & 3D SPIRALS -->
       <section id="tab-spirals" class="tab-panel hidden">
         <!-- Populated by spirals.js -->
       </section>
 
-      <!-- TAB 5: 1-BILLION-DIGIT QUEST & CONJECTURES -->
+      <!-- TAB 5: THE 41M TITAN DEEP DIVE -->
+      <section id="tab-titan" class="tab-panel hidden">
+        <!-- Populated by titan.js -->
+      </section>
+
+      <!-- TAB 6: TRICKS & APPROACHES LAB -->
+      <section id="tab-tricks" class="tab-panel hidden">
+        <!-- Populated by tricksLab.js -->
+      </section>
+
+      <!-- TAB 7: 1-BILLION-DIGIT QUEST & CONJECTURES -->
       <section id="tab-conjectures" class="tab-panel hidden">
         <!-- Populated by conjectures.js -->
       </section>
@@ -124,13 +136,13 @@
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-slate-800/60 bg-slate-900/30 text-xs text-slate-500 py-4 font-mono">
+    <footer class="border-t border-slate-800/60 bg-slate-950/80 backdrop-blur text-xs text-slate-500 py-4 font-mono">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
         <div>
-          <span>PrimeForge Engine</span> • Multithreaded WebWorker BigInt Architecture
+          <span>PrimeForge 3D Engine</span> • Three.js WebGL & Multithreaded WebWorkers
         </div>
         <div class="flex items-center gap-4">
-          <span>EFF Cooperative Computing $250,000 Bounty Target: 10⁹ Digits</span>
+          <span>EFF $250,000 Bounty Target: 10⁹ Digits</span>
           <span class="text-cyan-400">Running Live</span>
         </div>
       </div>
