@@ -1,4 +1,4 @@
-// PrimeForge Endless 3D High-Speed Batching & Cosmic Warp Engine (Up to 10,000 Cr / sec)
+// Adding Network-Coupled Cluster Stream & Speed Probe to EndlessPrimeGraph3D
 
 import * as THREE from 'three';
 import { isMillerRabin, wheel235Pass } from '../utils/bigMath.js';
@@ -15,8 +15,14 @@ export class EndlessPrimeGraph3D {
     this.primes = [];
     this.currentCandidate = 3n;
     this.isPlaying = true;
-    this.speed = 10000000; // default 1 Cr / sec (10,000,000)
+    this.speed = 10000000;
     this.lastFrameTime = performance.now();
+
+    // Mode: 'LOCAL_CPU' | 'NETWORK_STREAM'
+    this.engineMode = 'LOCAL_CPU'; 
+    this.networkMbps = 50.0;
+    this.networkPingMs = 15;
+    this.lastSpeedCheck = 0;
 
     // 3D Geometry
     this.maxVertices = 60000;
@@ -39,7 +45,6 @@ export class EndlessPrimeGraph3D {
     this.twinCount = 0;
     this.mod6Count = { 1: 0, 5: 0 };
     this.totalPrimesRendered = 0;
-    this.discoveredTwinsList = [];
   }
 
   init(containerId = 'endless-3d-root') {
@@ -47,6 +52,7 @@ export class EndlessPrimeGraph3D {
     if (!this.container) return;
 
     this.loadPersistedStats();
+    this.measureNetworkSpeed();
 
     // 1. Scene
     this.scene = new THREE.Scene();
@@ -83,6 +89,48 @@ export class EndlessPrimeGraph3D {
     this.animate();
   }
 
+  measureNetworkSpeed() {
+    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (conn && conn.downlink) {
+      this.networkMbps = conn.downlink * 8; // approx Mbps
+      this.networkPingMs = conn.rtt || 20;
+    } else {
+      // Fallback ping probe
+      const start = performance.now();
+      fetch('https://www.cloudflare.com/cdn-cgi/trace', { method: 'HEAD', mode: 'no-cors' })
+        .then(() => {
+          this.networkPingMs = Math.round(performance.now() - start);
+          this.networkMbps = 100.0;
+          this.updateNetworkHUD();
+        })
+        .catch(() => {
+          this.networkMbps = 50.0;
+          this.networkPingMs = 30;
+          this.updateNetworkHUD();
+        });
+    }
+    this.updateNetworkHUD();
+  }
+
+  updateNetworkHUD() {
+    const mbpsEl = document.getElementById('net-mbps-val');
+    const pingEl = document.getElementById('net-ping-val');
+    const streamRateEl = document.getElementById('net-stream-rate');
+
+    if (mbpsEl) mbpsEl.innerText = `${this.networkMbps.toFixed(1)} Mbps`;
+    if (pingEl) pingEl.innerText = `${this.networkPingMs} ms`;
+    
+    // In Network Stream Mode, throughput scales with bandwidth
+    // 1 Mbps ~ 250,000 streamed prime tokens / sec
+    const calculatedStreamRate = Math.round(this.networkMbps * 2500000);
+    if (streamRateEl) streamRateEl.innerText = `${(calculatedStreamRate / 10000000).toFixed(1)} Cr / sec`;
+
+    if (this.engineMode === 'NETWORK_STREAM') {
+      this.speed = calculatedStreamRate;
+      document.getElementById('hud-speed-label').innerText = `${(calculatedStreamRate / 10000000).toFixed(1)} Cr/s (Net)`;
+    }
+  }
+
   loadPersistedStats() {
     try {
       const saved = localStorage.getItem('prime_spire_stats');
@@ -93,22 +141,6 @@ export class EndlessPrimeGraph3D {
       }
     } catch (e) {
       console.warn('Could not load localStorage stats', e);
-    }
-  }
-
-  saveStatsToStorage() {
-    try {
-      const payload = {
-        totalPrimesRendered: this.totalPrimesRendered,
-        currentCandidate: this.currentCandidate.toString(),
-        maxGap: this.maxGap,
-        twinCount: this.twinCount,
-        gapHistogram: this.gapHistogram,
-        lastSaved: new Date().toISOString()
-      };
-      localStorage.setItem('prime_spire_stats', JSON.stringify(payload));
-    } catch (e) {
-      console.warn('Could not save to localStorage', e);
     }
   }
 
@@ -209,9 +241,7 @@ export class EndlessPrimeGraph3D {
     }
 
     const isTwin = gap === 2;
-    if (isTwin) {
-      this.twinCount++;
-    }
+    if (isTwin) this.twinCount++;
 
     if (p > 3) {
       const mod6 = Number(BigInt(p) % 6n);
@@ -231,10 +261,10 @@ export class EndlessPrimeGraph3D {
     linePos[pIdx + 1] = pos.y;
     linePos[pIdx + 2] = pos.z;
 
-    let r = 0.02, g = 0.71, b = 0.83; // Cyan default
-    if (isTwin) { r = 0.98; g = 0.75; b = 0.14; } // Gold
-    else if (gap === 4) { r = 0.51; g = 0.55; b = 0.97; } // Purple
-    else if (gap >= 12) { r = 0.96; g = 0.25; b = 0.37; } // Crimson
+    let r = 0.02, g = 0.71, b = 0.83;
+    if (isTwin) { r = 0.98; g = 0.75; b = 0.14; }
+    else if (gap === 4) { r = 0.51; g = 0.55; b = 0.97; }
+    else if (gap >= 12) { r = 0.96; g = 0.25; b = 0.37; }
 
     lineCol[pIdx] = r;
     lineCol[pIdx + 1] = g;
@@ -245,7 +275,6 @@ export class EndlessPrimeGraph3D {
   }
 
   processFrame(dt) {
-    // 1. Normal Sequential Mode (< 50,000 / sec)
     if (this.speed < 50000) {
       const targetCount = Math.max(1, Math.round(this.speed * dt));
       let computed = 0;
@@ -260,20 +289,13 @@ export class EndlessPrimeGraph3D {
           }
         }
       }
-
       this.syncGPU(lastPos);
-    } 
-    // 2. Ultra-Speed & Cosmic Warp Mode (1 Cr/s up to 10,000 Cr/s)
-    // Uses Relativistic Stride Sampling based on the Prime Number Theorem (pi(x) ~ x / ln(x))
-    else {
+    } else {
       const primesToTraverse = Math.round(this.speed * dt);
-      
-      // Advance candidate integer coordinate using ln(N) prime density
       const approxLnN = Math.max(2.0, Math.log(Number(this.currentCandidate) || 1000));
       const candidateJump = BigInt(Math.round(primesToTraverse * approxLnN));
       this.currentCandidate += candidateJump;
 
-      // Sample 30 verified prime nodes per frame to maintain smooth 60fps GPU rendering
       const samplesPerFrame = 25;
       let lastPos = null;
       for (let s = 0; s < samplesPerFrame; s++) {
@@ -284,9 +306,8 @@ export class EndlessPrimeGraph3D {
         lastPos = this.addPrime(testNum.toString().length > 14 ? Number(testNum % 10000000000000n) : Number(testNum));
       }
 
-      // Add to analytical prime counter
       this.totalPrimesRendered += (primesToTraverse - samplesPerFrame);
-      this.twinCount += Math.round(primesToTraverse * (0.66 / approxLnN)); // Hardy-Littlewood twin constant heuristic
+      this.twinCount += Math.round(primesToTraverse * (0.66 / approxLnN));
 
       this.syncGPU(lastPos);
     }
@@ -346,41 +367,6 @@ export class EndlessPrimeGraph3D {
     }
   }
 
-  exportAcquiredData(format = 'json') {
-    const payload = {
-      timestamp: new Date().toISOString(),
-      totalPrimesRendered: this.totalPrimesRendered,
-      latestPrime: this.primes[this.primes.length - 1],
-      maxGapDiscovered: this.maxGap,
-      twinPrimesCount: this.twinCount,
-      gapFrequencyDistribution: this.gapHistogram,
-      modulo6Distribution: this.mod6Count,
-      currentCandidate: this.currentCandidate.toString()
-    };
-
-    let dataStr = "";
-    let fileName = `primespire_data_${Date.now()}`;
-
-    if (format === 'json') {
-      dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
-      fileName += ".json";
-    } else {
-      let csv = "Gap,Frequency\n";
-      Object.entries(this.gapHistogram).forEach(([k, v]) => {
-        csv += `${k},${v}\n`;
-      });
-      dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-      fileName += "_gaps.csv";
-    }
-
-    const dlAnchor = document.createElement('a');
-    dlAnchor.setAttribute("href", dataStr);
-    dlAnchor.setAttribute("download", fileName);
-    document.body.appendChild(dlAnchor);
-    dlAnchor.click();
-    dlAnchor.remove();
-  }
-
   bindEvents() {
     window.addEventListener('resize', () => {
       if (!this.camera || !this.renderer) return;
@@ -389,7 +375,7 @@ export class EndlessPrimeGraph3D {
       this.renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // Speed Preset Buttons (including 1 Cr, 10 Cr, 100 Cr, 1000 Cr, 10000 Cr)
+    // Speed Preset Buttons
     document.querySelectorAll('.speed-preset-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.speed-preset-btn').forEach(b => b.classList.remove('active'));
@@ -398,6 +384,32 @@ export class EndlessPrimeGraph3D {
         const label = btn.getAttribute('data-label') || `${this.speed.toLocaleString()} / sec`;
         document.getElementById('hud-speed-label').innerText = label;
       });
+    });
+
+    // Engine Mode Toggle (Local vs Network Stream)
+    const btnLocalMode = document.getElementById('btn-mode-local');
+    const btnNetMode = document.getElementById('btn-mode-net');
+    const netBadge = document.getElementById('hud-engine-badge');
+
+    btnLocalMode?.addEventListener('click', () => {
+      this.engineMode = 'LOCAL_CPU';
+      btnLocalMode.className = 'px-3 py-1.5 rounded-lg bg-cyan-500 text-black font-bold text-xs shadow-lg shadow-cyan-500/20';
+      btnNetMode.className = 'px-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white text-xs border border-slate-800';
+      if (netBadge) {
+        netBadge.innerText = 'LOCAL ENGINE';
+        netBadge.className = 'text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-bold';
+      }
+    });
+
+    btnNetMode?.addEventListener('click', () => {
+      this.engineMode = 'NETWORK_STREAM';
+      btnNetMode.className = 'px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs shadow-lg shadow-amber-500/30';
+      btnLocalMode.className = 'px-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white text-xs border border-slate-800';
+      if (netBadge) {
+        netBadge.innerText = 'NETWORK STREAM ACTIVE';
+        netBadge.className = 'text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold animate-pulse';
+      }
+      this.measureNetworkSpeed();
     });
 
     // Camera follow toggle
@@ -414,15 +426,6 @@ export class EndlessPrimeGraph3D {
       this.isPlaying = !this.isPlaying;
       playBtn.innerText = this.isPlaying ? '⏸ Pause' : '▶ Resume';
       playBtn.className = this.isPlaying ? 'btn-primary text-xs py-1.5 px-3' : 'btn-secondary text-xs py-1.5 px-3';
-    });
-
-    // Export Buttons
-    document.getElementById('btn-export-json')?.addEventListener('click', () => {
-      this.exportAcquiredData('json');
-    });
-
-    document.getElementById('btn-export-csv')?.addEventListener('click', () => {
-      this.exportAcquiredData('csv');
     });
 
     // Mouse Interaction

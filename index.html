@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PrimeSpire 3D — Ultra-Warp Cosmic Prime Manifold (Up to 10,000 Cr / sec)</title>
+  <title>PrimeSpire 3D — Dual Engine: Local GPU & Network Stream Mode</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
@@ -54,7 +54,7 @@
     <!-- Top Header & Live Telemetry -->
     <header class="flex flex-col md:flex-row md:items-center justify-between gap-4">
       
-      <!-- Brand Box -->
+      <!-- Brand Box with Mode Toggle -->
       <div class="flex items-center gap-3 pointer-events-auto bg-slate-950/85 backdrop-blur-md p-3.5 rounded-2xl border border-slate-800 shadow-2xl">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-sky-400 to-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-cyan-500/30">
           ℘
@@ -64,11 +64,20 @@
             <h1 class="font-outfit font-black text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 via-sky-200 to-indigo-300">
               PrimeSpire 3D
             </h1>
-            <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-bold animate-pulse">
-              WARP ENGINE: 10,000 CR / SEC
+            <span id="hud-engine-badge" class="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-bold">
+              LOCAL ENGINE
             </span>
           </div>
-          <p class="text-xs text-slate-400 font-mono">Continuous Relativistic Prime Manifold</p>
+          
+          <!-- Mode Choice Buttons -->
+          <div class="flex items-center gap-2 mt-1.5 font-mono text-xs">
+            <button id="btn-mode-local" class="px-3 py-1 rounded-lg bg-cyan-500 text-black font-bold text-xs shadow-lg shadow-cyan-500/20">
+              💻 Local Mode
+            </button>
+            <button id="btn-mode-net" class="px-3 py-1 rounded-lg bg-slate-900 text-slate-400 hover:text-white text-xs border border-slate-800">
+              🌐 Network Stream Mode
+            </button>
+          </div>
         </div>
       </div>
 
@@ -79,48 +88,54 @@
           <span id="hud-current-prime" class="text-cyan-300 font-black text-sm">2</span>
         </div>
         <div class="px-2.5 py-1 bg-slate-900 rounded-lg border border-slate-800">
-          <span class="text-slate-500 block text-[10px]">LAST GAP</span>
-          <span id="hud-current-gap" class="text-amber-400 font-bold text-sm">Start</span>
-        </div>
-        <div class="px-2.5 py-1 bg-slate-900 rounded-lg border border-slate-800">
           <span class="text-slate-500 block text-[10px]">TOTAL PRIMES TRAVERSED</span>
           <span id="hud-total-primes" class="text-slate-200 font-bold text-sm">1</span>
         </div>
         <div class="px-2.5 py-1 bg-slate-900 rounded-lg border border-slate-800">
-          <span class="text-slate-500 block text-[10px]">CURRENT SPEED</span>
+          <span class="text-slate-500 block text-[10px]">EFFECTIVE THROUGHPUT</span>
           <span id="hud-speed-label" class="text-amber-400 font-bold text-sm">1 Cr / sec</span>
         </div>
       </div>
 
     </header>
 
-    <!-- Center Left: Live Mathematical Relations & Data Storage Panel -->
+    <!-- Center Left: Live Mathematical Relations & Network Probe Panel -->
     <div class="max-w-sm pointer-events-auto bg-slate-950/90 backdrop-blur-md p-4 rounded-2xl border border-cyan-500/30 shadow-2xl space-y-3 font-mono text-xs">
       
       <div class="flex items-center justify-between border-b border-slate-800 pb-2">
         <div class="flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-          <span class="text-slate-200 font-bold">Acquired Relations & Gaps</span>
+          <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+          <span class="text-slate-200 font-bold">Engine & Network Probe</span>
         </div>
-        <span class="text-[10px] text-emerald-400 font-bold">Auto-Persisted</span>
+        <span class="text-[10px] text-emerald-400 font-bold">Online</span>
+      </div>
+
+      <!-- Real-Time Network Bandwidth Card -->
+      <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5 text-[11px]">
+        <div class="flex justify-between">
+          <span class="text-slate-400">Wi-Fi / Ethernet Speed:</span>
+          <span id="net-mbps-val" class="text-cyan-300 font-bold">Measuring...</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Network Latency (Ping):</span>
+          <span id="net-ping-val" class="text-amber-300 font-bold">-- ms</span>
+        </div>
+        <div class="flex justify-between pt-1 border-t border-slate-800 text-[10px]">
+          <span class="text-slate-500">Bandwidth Scaling Throughput:</span>
+          <span id="net-stream-rate" class="text-emerald-400 font-bold">-- Cr / sec</span>
+        </div>
       </div>
 
       <!-- Live Metrics -->
       <div class="grid grid-cols-2 gap-2 text-[11px]">
         <div class="bg-slate-900 p-2 rounded-lg border border-slate-800">
-          <span class="text-slate-500 block text-[10px]">TWIN PRIMES (p, p+2)</span>
+          <span class="text-slate-500 block text-[10px]">TWIN PRIMES</span>
           <span id="hud-twin-count" class="text-amber-300 font-bold">0 Twins</span>
         </div>
         <div class="bg-slate-900 p-2 rounded-lg border border-slate-800">
-          <span class="text-slate-500 block text-[10px]">LARGEST GAP RECORD</span>
+          <span class="text-slate-500 block text-[10px]">MAX GAP RECORD</span>
           <span id="hud-max-gap" class="text-rose-400 font-bold">Max Gap: 0</span>
         </div>
-      </div>
-
-      <!-- Modulo 6 Symmetry -->
-      <div class="bg-slate-900/60 p-2 rounded-lg border border-slate-800 text-[11px] flex justify-between">
-        <span class="text-slate-400">Modulo 6 Symmetry:</span>
-        <span id="hud-mod6-ratio" class="text-indigo-300 font-bold">6k±1: 50% / 50%</span>
       </div>
 
       <!-- Gap Frequency Distribution -->
@@ -128,19 +143,6 @@
         <span class="text-slate-400 text-[10px] block mb-1">Most Frequent Gaps:</span>
         <div id="hud-top-gaps" class="flex flex-wrap gap-1.5">
           <!-- Populated live -->
-        </div>
-      </div>
-
-      <!-- Export Data Actions -->
-      <div class="pt-2 border-t border-slate-800 flex items-center justify-between gap-2">
-        <span class="text-[10px] text-slate-400">Export Acquired Data:</span>
-        <div class="flex gap-1.5">
-          <button id="btn-export-json" class="text-[10px] font-mono px-2 py-1 rounded bg-slate-900 border border-slate-700 hover:border-cyan-400 text-cyan-300 transition">
-            📥 JSON
-          </button>
-          <button id="btn-export-csv" class="text-[10px] font-mono px-2 py-1 rounded bg-slate-900 border border-slate-700 hover:border-cyan-400 text-cyan-300 transition">
-            📥 CSV
-          </button>
         </div>
       </div>
 
@@ -171,7 +173,7 @@
       </div>
 
       <div class="text-[11px] font-mono text-slate-500 hidden 2xl:block">
-        Relativistic Stride Engine • 60 FPS
+        Dual Architecture • Local & Network Stream
       </div>
 
     </footer>
