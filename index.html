@@ -3,132 +3,111 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PrimeNexus 3D — The Web of Prime Relations & Discovery Engine</title>
+  <title>PrimeSpire 3D — Endless Dot-by-Dot Prime Manifold & Relation Engine</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/src/styles/style.css" />
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-cyan-500 selection:text-black relative overflow-x-hidden">
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans overflow-hidden select-none">
   
-  <!-- 3D Three.js WebGL Cosmic Background -->
-  <div id="webgl-3d-bg" class="fixed inset-0 pointer-events-none z-0"></div>
+  <!-- The Fullscreen 3D Three.js WebGL Canvas -->
+  <div id="endless-3d-root" class="fixed inset-0 z-0"></div>
 
-  <div id="app" class="flex flex-col min-h-screen relative z-10">
+  <!-- HUD Overlay -->
+  <div class="fixed inset-0 z-10 pointer-events-none flex flex-col justify-between p-4 sm:p-6 lg:p-8">
     
-    <!-- Top Header & Global Status -->
-    <header class="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-50 shadow-2xl">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-white font-black text-xl border border-cyan-400/30">
-            ℘
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h1 class="font-outfit font-black text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-300">
-                PrimeNexus 3D
-              </h1>
-              <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 font-bold">
-                Relations → Discovery
-              </span>
-            </div>
-            <p class="text-xs text-slate-400 font-mono hidden sm:block">Connecting the Secret Patterns of Primes</p>
-          </div>
+    <!-- Top Header & Live Telemetry -->
+    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex items-center gap-3 pointer-events-auto bg-slate-950/80 backdrop-blur-md p-3.5 rounded-2xl border border-slate-800 shadow-2xl">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-sky-400 to-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-cyan-500/30">
+          ℘
         </div>
-
-        <!-- Global Telemetry Badges -->
-        <div class="flex items-center gap-2 sm:gap-4">
-          <!-- Background Worker Status Indicator -->
-          <div class="flex items-center gap-2 bg-slate-900/90 border border-slate-700/60 px-3 py-1.5 rounded-lg shadow-inner">
-            <span id="worker-pulse" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <div class="text-xs font-mono">
-              <span class="text-slate-400 hidden sm:inline">Engine:</span>
-              <span id="global-worker-status" class="text-emerald-400 font-semibold">Active</span>
-            </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-outfit font-black text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 via-sky-200 to-indigo-300">
+              PrimeSpire 3D
+            </h1>
+            <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-bold animate-pulse">
+              LIVE CONNECTING DOTS
+            </span>
           </div>
-
-          <!-- Total Speed -->
-          <div class="hidden md:flex items-center gap-1.5 bg-slate-900/90 border border-slate-700/60 px-3 py-1.5 rounded-lg text-xs font-mono">
-            <span class="text-slate-400">Rate:</span>
-            <span id="global-rate" class="text-cyan-400 font-bold">0</span>
-            <span class="text-slate-500 text-[10px]">ops/s</span>
-          </div>
-
-          <!-- Discovered Count -->
-          <div class="flex items-center gap-1.5 bg-slate-900/90 border border-slate-700/60 px-3 py-1.5 rounded-lg text-xs font-mono">
-            <span class="text-amber-400 font-bold">★</span>
-            <span id="global-primes-found" class="text-amber-300 font-bold">0</span>
-            <span class="text-slate-400 hidden sm:inline">relations</span>
-          </div>
-
-          <!-- Sound Toggle -->
-          <button id="btn-toggle-sound" class="p-2 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-slate-700/60 text-slate-300 hover:text-white transition" title="Toggle Discovery Audio Chimes">
-            <svg id="icon-sound-on" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-            <svg id="icon-sound-off" class="hidden" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
-          </button>
+          <p class="text-xs text-slate-400 font-mono">2 → 3 → 5 → 7 → 11 → 13 → 17... (Endless Spire)</p>
         </div>
       </div>
 
-      <!-- Navigation Tabs -->
-      <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1 sm:space-x-3 border-t border-slate-800/50 overflow-x-auto no-scrollbar">
-        <button data-tab="tab-nexus" class="nav-tab active">
-          <span class="mr-1.5">🌐</span> 3D Relation Nexus
-        </button>
-        <button data-tab="tab-relations" class="nav-tab">
-          <span class="mr-1.5">🔗</span> The 6 Relations
-        </button>
-        <button data-tab="tab-hunter-rel" class="nav-tab">
-          <span class="mr-1.5">🎯</span> Relational Hunter
-        </button>
-        <button data-tab="tab-hunter" class="nav-tab">
-          <span class="mr-1.5">⚡</span> Live Background Miner
-        </button>
-        <button data-tab="tab-story" class="nav-tab">
-          <span class="mr-1.5">📖</span> Human Story Guide
-        </button>
-      </nav>
+      <!-- Live Prime Counter Bar -->
+      <div class="flex items-center gap-2 sm:gap-3 pointer-events-auto bg-slate-950/80 backdrop-blur-md p-3 rounded-2xl border border-slate-800 shadow-2xl font-mono text-xs">
+        <div class="px-2.5 py-1 bg-slate-900 rounded-lg border border-slate-800">
+          <span class="text-slate-500 block text-[10px]">CURRENT PRIME</span>
+          <span id="hud-current-prime" class="text-cyan-300 font-black text-sm">2</span>
+        </div>
+        <div class="px-2.5 py-1 bg-slate-900 rounded-lg border border-slate-800">
+          <span class="text-slate-500 block text-[10px]">LAST GAP</span>
+          <span id="hud-current-gap" class="text-amber-400 font-bold text-sm">Start</span>
+        </div>
+        <div class="px-2.5 py-1 bg-slate-900 rounded-lg border border-slate-800">
+          <span class="text-slate-500 block text-[10px]">PRIMES RENDERED</span>
+          <span id="hud-total-primes" class="text-slate-200 font-bold text-sm">1</span>
+        </div>
+      </div>
     </header>
 
-    <!-- Main Content Area -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-      
-      <!-- TAB 1: 3D RELATION NEXUS (ACTIVE DEFAULT) -->
-      <section id="tab-nexus" class="tab-panel active">
-        <!-- Populated by relationNexus3D.js -->
-      </section>
-
-      <!-- TAB 2: THE 6 FUNDAMENTAL RELATIONS -->
-      <section id="tab-relations" class="tab-panel hidden">
-        <!-- Populated by relationsExplorer.js -->
-      </section>
-
-      <!-- TAB 3: RELATIONSHIP-DRIVEN HUNTER -->
-      <section id="tab-hunter-rel" class="tab-panel hidden">
-        <!-- Populated by relationHunter.js -->
-      </section>
-
-      <!-- TAB 4: LIVE BACKGROUND MINER -->
-      <section id="tab-hunter" class="tab-panel hidden">
-        <!-- Populated by hunter.js -->
-      </section>
-
-      <!-- TAB 5: STORY GUIDE -->
-      <section id="tab-story" class="tab-panel hidden">
-        <!-- Populated by storyRelations.js -->
-      </section>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="border-t border-slate-800/60 bg-slate-950/80 backdrop-blur text-xs text-slate-500 py-4 font-mono">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
-        <div>
-          <span>PrimeNexus 3D Engine</span> • Three.js WebGL & Multithreaded Relational BigInt Architecture
+    <!-- Center Left: Live Mathematical Relations Observer -->
+    <div class="max-w-sm pointer-events-auto bg-slate-950/85 backdrop-blur-md p-4 rounded-2xl border border-cyan-500/30 shadow-2xl space-y-3 font-mono text-xs">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+          <span class="text-slate-200 font-bold">Relational Observer</span>
         </div>
-        <div class="flex items-center gap-4">
-          <span>From Relationships to Discoveries</span>
-          <span class="text-cyan-400">Running Live</span>
+        <span class="text-[10px] text-cyan-400">Live Patterns</span>
+      </div>
+
+      <!-- Live Twin & Modulo Metrics -->
+      <div class="grid grid-cols-2 gap-2 text-[11px]">
+        <div class="bg-slate-900 p-2 rounded-lg border border-slate-800">
+          <span class="text-slate-500 block text-[10px]">TWIN PAIRS (p, p+2)</span>
+          <span id="hud-twin-count" class="text-amber-300 font-bold">0 Twins</span>
         </div>
+        <div class="bg-slate-900 p-2 rounded-lg border border-slate-800">
+          <span class="text-slate-500 block text-[10px]">MODULO 6 RESIDUES</span>
+          <span id="hud-mod6-ratio" class="text-indigo-300 font-bold">6k±1</span>
+        </div>
+      </div>
+
+      <!-- Gap Frequency Distribution -->
+      <div>
+        <span class="text-slate-400 text-[10px] block mb-1.5">Dominant Prime Gaps Observed:</span>
+        <div id="hud-top-gaps" class="flex flex-wrap gap-1.5">
+          <!-- Populated live -->
+        </div>
+      </div>
+
+      <div class="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 font-sans leading-relaxed">
+        3D Manifold Equation: \(\theta = n \cdot 2\pi/\phi\), \(r = \sqrt{n}\), \(z = n \cdot h\). Nodes glow gold for Twin Primes (\(p+2\)) and crimson for large gaps.
+      </div>
+    </div>
+
+    <!-- Bottom Controls & Navigation -->
+    <footer class="flex flex-col sm:flex-row items-center justify-between gap-4 pointer-events-auto bg-slate-950/85 backdrop-blur-md p-3.5 rounded-2xl border border-slate-800 shadow-2xl">
+      <div class="flex items-center gap-3">
+        <button id="btn-toggle-play" class="btn-primary text-xs py-1.5 px-4 shadow-lg shadow-cyan-500/20">
+          ⏸ Pause Spire
+        </button>
+        <button id="btn-toggle-follow" class="btn-primary text-xs py-1.5 px-4">
+          Follow Camera: LOCKED
+        </button>
+      </div>
+
+      <!-- Speed Slider -->
+      <div class="flex items-center gap-3 font-mono text-xs">
+        <span class="text-slate-400">Growth Speed:</span>
+        <input id="slider-speed" type="range" min="1" max="100" value="20" class="w-32 accent-cyan-400 cursor-pointer">
+        <span id="speed-val-label" class="text-cyan-300 font-bold">20 / sec</span>
+      </div>
+
+      <div class="text-[11px] font-mono text-slate-500 hidden md:block">
+        Scroll to Zoom • Drag mouse to look around
       </div>
     </footer>
 
